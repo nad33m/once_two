@@ -1,0 +1,141 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+
+<style>
+
+.iframe-container {display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden;}
+.parent-fit { flex-grow: 1; border: none; margin: 0; padding: 0; height: 100vh; }
+
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+
+            <div class="col-md-12">
+                
+              <form method="get" action="{% url 'timesheet-page' %}">
+                <div class="row">
+                  <div class="col">
+                  
+                      {% csrf_token %}
+                      <select class="form-control" id="q" name="q">
+                        <option value=""> Select staff Name </option>
+                        {% for staffname in staffnames %}
+                          <option value="{{ staffname.StaffCode }}" >{{ staffname.StaffName }} - ({{ staffname.StaffCode }})
+                          </option>
+                        {% endfor %}
+                          
+                      </select> 
+                  </div>
+                  <div class="col">
+                      <button class="btn btn-info" id="" data-toggle="" data-target="" >
+                        Search
+                      </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="col-md-12">
+              <hr class="blurry">
+            </div>  
+{% if record_count %}  
+    <div class="col-md-12">
+      <div class="card ">
+        <div class="card-header">   
+
+          <h3 class="card-title">{% if request.GET.q %} TIME SHEET OF: <strong> {{ dataentry.0.staff_name }} </strong> {% endif %} </h3>
+          
+          <p class="category"> Total <kbd>{{ record_count }}</kbd>  visits during last 30 days. {{ dataentry.0.assignedSchools }}  </p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table tablesorter" id="">
+              <thead class="text-primary">
+                <tr>
+                  <th>
+                    S.No </a>
+                  </th>
+                  <th>
+                    Date of Visit </a>
+                  </th>
+                  <th>
+                    School Name </a>
+                  </th>
+                  <th>
+                    School Code
+                  </th>
+                  <th>
+                    Staff Name
+                  </th>
+                  <th class="text-center">
+                    District
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in dataentry %}
+                <tr>
+                  <td>
+                    {{ forloop.counter }}. 
+                  </td>
+                  <td>
+                    {{ item.dateofvisit }}
+                  </td>
+                  <td>
+                    {{ item.schoolname | upper }}
+                  </td>
+                  <td>
+                    {{ item.bemiscode }}
+                  </td>
+                  <td>
+                    {{ item.staff_name }}
+                  </td>
+                  <td class="text-center">
+                    {{ item.district }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+          {% else %}
+          <div class="col-md-12">
+            <div class="card  card-plain">
+              <div class="card-header">
+                <h3 class="card-title" style="color: brown;"> No entries found  </strong> </h3>
+                <p class="category "> Total visits during last 30 days:  </p>
+              </div>
+              <div class="card-body"></div>
+            </div>
+          </div>        
+
+
+            {% endif %} 
+    <div class="col-md-12">
+      <div class="card  card-plain">
+        <div class="card-header">
+          <h4 class="card-title"> </h4>
+          <p class="category"></p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+
+
+{% endblock content %}

@@ -1,0 +1,89 @@
+{% extends 'androidchecklist/base.html' %}
+
+{% block content %}
+
+<input name="q"
+       placeholder="Search for a title"
+       hx-get="{% url 'search-page' %}"
+       hx-target="#results"
+       hx-trigger="input delay:0.2s"
+>
+<section id="results">
+    <div class="results">
+        {% include 'search.html' %}
+    </div>
+</section>
+
+<div class="container-fluid">
+  <h3></h3>
+  {% for item in dataentry %}
+  {% endfor %}
+</div>
+{% if q %} 
+  <h5>Showing result of <b>School Name:  {{ dataentry.0.schoolname | upper }}, {{ dataentry.0.district | upper }} </b>, Record shows entries during last <kbd><strong>4</strong></kbd> Months  </h5>
+  {{ dataentry.0.StaffName | upper }}
+{% endif %}
+<table class="table font-monospace" style="table-layout: fixed;"> 
+{% for item in dataentry %}
+<tr class="field-titles" >
+  <td> <mark class=""> Date of Visit:  {{ item.dateofvisit | date:"d-M-Y"  }}  visited by: {{ item.staff_name }} </mark> </td> {# Missing whitespace before 'linebreaks' #}
+  <td>  District:     {{ item.district | upper }} </td>
+  <td>  School Name:  {{ item.schoolname | upper }}  </td>
+  <td>  School Code:  {{ item.bemiscode }}  </td>
+  
+  <td>  During visit:  
+      {% if item.schoolStatus == "close" %} 
+        <span class="bg-danger"> {{ item.schoolStatus | upper }} </span> 
+        {% else %} {{ item.schoolStatus | upper }}  
+      {% endif %}
+      {% comment %} {% if item.StaffName == "FS-PJ" %}  {# Use '==' instead of '=' for comparison #}
+     <b> Staff Name:</b> Nadeem ud-Din
+    {% else %}
+  <b>Staff Name:</b> {{ item.StaffName }} {# Missing whitespace before 'item.StaffName' #}
+    {% endif %} {% endcomment %}
+  </td>
+  <td>  {% if item.ptscms_enroll == "no" %}
+        <span class="text-danger"><b> PTSMC Child Enroll:</b> {{ item.ptscms_enroll }} | {{ item.ptsmc_designation }} </span>
+       {% else %}
+        <b> PTSMC Child Enroll:</b> {{ item.ptscms_enroll }}
+       {% endif %} 
+  </td>
+
+</tr>  
+<tr>
+  <td style="vertical-align: middle;"> <span class=""> <strong> Enrollment as Per Register: </strong> </span>  </td>
+  <td >  
+    <div>
+      <h5> Girls Enrollment:
+       <span class="position-absolute badge rounded-pill bg-primary"> {{ item.girls_reg_kachi | add:item.girls_reg_one | add:item.girls_reg_two | add:item.girls_reg_three | add:item.girls_reg_four | add:item.girls_reg_five }} 
+       </span> </h5>
+       <h5>Boys Enrollment: 
+        <span class="position-absolute badge rounded-pill bg-primary"> {{ item.boys_reg_kachi | add:item.boys_reg_one | add:item.boys_reg_two | add:item.boys_reg_three | add:item.boys_reg_four | add:item.boys_reg_five }}   
+        </span> </5>
+    </div>
+  </td>
+  <td style="vertical-align: middle;">  <span class=""> <strong> Enrollment at time of visit: </strong> </span> </td>
+  
+  <td> 
+    <div> 
+      <h5>Girls Enrollment:
+      <span class="position-absolute badge rounded-pill bg-primary">{{ item.girls_kachi | add:item.girls_one | add:item.girls_two | add:item.girls_three | add:item.girls_four | add:item.girls_five }}   
+      </span> </h5> 
+      <h5> Boys Enrollment: 
+      <span class="position-absolute badge rounded-pill bg-primary">{{ item.boys_kachi | add:item.boys_one | add:item.boys_two | add:item.boys_three | add:item.boys_four | add:item.boys_five }}
+      </span> </h5>
+    </div>
+  </td>
+  <td class="text-justify">
+    <div class="">  
+     <h5> Remarks: 
+      <span class="font-monospace">{{ item.descriptions}}
+      </span> </h5>
+    </div>
+  </td>
+</tr>    
+{% endfor %}
+</tbody>
+{% comment %} <div class="table-responsive-sm"> {% endcomment %}
+</table>
+{% endblock %}    

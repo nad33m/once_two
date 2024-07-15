@@ -1,0 +1,26 @@
+{% extends 'androidchecklist/base.html' %}
+
+{% block content %}
+
+<div class="container">
+  <h1>Autocomplete Example</h1>
+  <div id="autocomplete" class="autocomplete">
+    <input class="autocomplete-input"
+      placeholder="Search for a country"
+      aria-label="Search for a country"
+    >
+    <ul class="autocomplete-result-list"></ul>
+  </div>
+</div>
+
+<script>
+  new Autocomplete('#autocomplete',{
+
+      search : input =>{
+        console.log(input)
+      }
+
+  })
+</script>
+
+{% endblock %}

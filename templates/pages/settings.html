@@ -1,0 +1,35 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+<div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-plain">
+          <div class="card-header">
+            <ul class="list-unstyled">
+                <li><a id="delete-link" class="btn btn-danger" href="{% url 'delete-page' %}">Delete existing records from Database</a></li>
+              
+                <li><a class="btn btn-primary"  href="{% url 'insert-page' %}"> Import records from JSON Endpoint. </a></li>
+              
+                <li><a class="btn btn-info"  href="{% url 'record-page' %}"> Show recrod page </a></li>
+              
+                <li><a class="btn btn-info"  href="{% url 'charts-page' %}"> Show Charts page </a></li>
+              
+                <li><a class="btn btn-danger"  href="{% url 'search-schools-page' %}"> Search Schools </a></li>
+            </ul>  
+          </div>
+          <div class="card-body">
+            <div id="map" class="map"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="mb-1"> </div>
+
+
+
+{% endblock %}
+
+
+  

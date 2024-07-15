@@ -1,0 +1,196 @@
+
+{% extends 'androidchecklist/base.html' %}
+
+{% block content %}
+
+
+<form method="get" action="{% url 'record-page' %}">
+  {% csrf_token %}
+  
+  <label class="" for="query">Search:</label>
+  <input value="{{ request.GET.q }}" class="form-control" type="text" id="query" name="q" required> <br>
+  <button class="btn btn-info" type="submit" >Search</button>
+</form>
+
+
+  <h3></h3>
+  {% comment %} -------------------------------------------------------------- {% endcomment %}
+   <div class="container mt-3 mb-3">
+      <div class="row">
+        <div class="col-md-9 offset-md-0">
+        <p class="h5 shadow-sm p-1 mb-4 bg-white rounded">
+          Visit timeline of CS: {{ dataentry.0.schoolname | upper }} - {{ dataentry.0.bemiscode | upper }} <br/> visited by: {{ dataentry.0.staff_name }}
+        </p>
+        School visited <span class="badge rounded-pill bg-danger">{{ record_count }}</span> times in last 365 days.
+          <ul class="timeline">
+          {% for item in dataentry %}
+          
+            <li>
+              <strong><a href="#" class="float-right">{{ item.dateofvisit | date:"d-M-Y"  }}</a>  </strong>
+              | <a href="" class="text-danger"> {{ item.schoolname | upper }} - {{ item.bemiscode }} </a> 
+              | <a href="#" class="float-right">{{ item.staff_name }} </a>
+              <br/>
+              <div class="d-flex flex-col bd-highlight mb-2">
+                <div class="p-0 bd-highlight">
+                  Girls Enrollment (Attendance register):
+                  <span class="position-absolute badge rounded-pill bg-primary">  {{ item.girls_reg_kachi | add:item.girls_reg_one | add:item.girls_reg_two | add:item.girls_reg_three | add:item.girls_reg_four | add:item.girls_reg_five }} 
+                  </span>
+                </div>  
+                 &nbsp; &nbsp; &nbsp; &nbsp; 
+                <div class="p-0 bd-highlight">
+                  Boys Enrollment (Attendance register): 
+                  <span class="position-absolute badge rounded-pill bg-primary"> {{ item.boys_reg_kachi | add:item.boys_reg_one | add:item.boys_reg_two | add:item.boys_reg_three | add:item.boys_reg_four | add:item.boys_reg_five }}   
+                  </span>
+                </div> 
+              </div>
+              <div class="d-flex flex-row bd-highlight mb-2">
+                <div class="p-0 bd-highlight">
+                  Girls Enrollment (Present):
+                  <span class="position-absolute badge rounded-pill bg-primary">{{ item.girls_kachi | add:item.girls_one | add:item.girls_two | add:item.girls_three | add:item.girls_four | add:item.girls_five }}   
+                  </span>
+                </div>  
+                 &nbsp; &nbsp; &nbsp; &nbsp; 
+                <div class="p-0 bd-highlight">
+                  Boys Enrollment (Present): 
+                  <span class="position-absolute badge rounded-pill bg-primary">{{ item.boys_kachi | add:item.boys_one | add:item.boys_two | add:item.boys_three | add:item.boys_four | add:item.boys_five }}
+                  </span>
+                </div> 
+              </div>
+              <p class="lh-3"> <strong> Remarks: </strong> {{ item.descriptions | default:"No Remarks entered" }} </p>
+              <div class="table-responsive text-nowrap">
+              <table class="table table-hover">
+                <tr>
+                  <th colspan="6" >School Record Status</th>
+                  
+                </tr>
+                <tr class="p-3">
+                    <td>  Stu Att; Register Available </td> <td>{{ item.stu_att_register_available | cut:" " | capfirst }}<span class="border-end"></span></td> 
+                    <td>  A/W Register Available </td> <td> {{ item.aw_register_available | capfirst }}  <span class="border-end"></span></td>
+                    <td>  Stock Register Available </td> <td> {{ item.stock_register_available | capfirst }}  <span class="border-end"></span></td>
+                </tr>
+                <tr>
+                  <td>  Stu Att; Register Updated: </td> <td> {{ item.stu_att_register_update | capfirst }} </td>
+                  <td>  A/W Register Updated: </td> <td> {{ item.aw_register_update | capfirst }} </td>
+                  <td>  Stock Register Updated </td> <td> {{ item.stock_register_availablee | capfirst | default:"No"  }} </td>
+                </tr>
+                <tr>
+                  <td class=" {% if item.teach_att_register_available == no %} text-danger {% endif %}" >Teacher Att; Register Available:</td> <td> {{ item.teach_att_register_available | capfirst }} </td>
+                  <td>  Cash book Available:</td> <td> {{ item.cash_register_available | capfirst }} </td>  
+                  <td>  Log Book Available </td> <td> {{ item.log_register_available | capfirst }} </td>
+                </tr>
+                <tr>
+                  <td>Teacher Att; Register Updated:</td> <td> {{ item.teach_att_register_update | capfirst }} </td>
+                  <td>  Cash book Updated:</td> <td> {{ item.cash_register_update | capfirst }} </td>
+                  <td>  Log Book Register  Updated: </td> <td> {{ item.log_register_update | capfirst }} </td>
+                </tr>
+                <tr>
+                  <td colspan="6">  
+                    PTSMC Child Enrolled: {% if item.ptscms_enroll == "no" %} 
+                                            <span class="text-danger"> {{ item.ptscms_enroll | capfirst }} </span>
+                                            <strong> Designation: </strong> {{ item.ptsmc_designation | capfirst }}  
+                                          {% else %} 
+                                            {{ item.ptscms_enroll | capfirst }}  
+                                          {% endif %}
+                  
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="6">
+                      Stationary Purchased: {% if item.stationary_purchased == "yes" %} 
+                                              {{ item.stationary_purchased }}  - Amount : {{ item.stationary_amount_pkr }} 
+                                            {% else %}
+                                              Stationary not Purchased
+                                            {% endif %}  
+                  </td>
+
+                </tr>
+            </table>
+          </div>               
+            </li>
+           {% endfor %}  
+          </ul>
+         </div>
+         <div class="col-md-9 offset-md-0">
+          This is testing div....
+         </div>
+      </div>
+    </div> 
+{% comment %} -------------------------------------------------------------- {% endcomment %}
+
+{% if q %} 
+  <h5>Showing result of <b>School Name:  {{ dataentry.0.schoolname | upper }}, {{ dataentry.0.district | upper }} </b>, Record shows entries during last <kbd><strong>4</strong></kbd> Months  </h5>
+  {{ dataentry.0.StaffName | upper }}
+{% endif %}
+<table class="table" style="table-layout: fixed;"> 
+{% for item in dataentry %}
+<tr class="" >
+  <td> Date of Visit:  {{ item.dateofvisit | date:"d-M-Y"  }}  visited by: {{ item.staff_name }} </td> {# Missing whitespace before 'linebreaks' #}
+  <td>  District:     {{ item.district | upper }} </td>
+  <td>  School Name:  {{ item.schoolname | upper }}  </td>
+  <td>  School Code:  {{ item.bemiscode }}  </td>
+  
+  <td>  During visit:  
+      {% if item.schoolStatus == "close" %} 
+        <span class="bg-danger"> {{ item.schoolStatus | upper }} </span> 
+        {% else %} {{ item.schoolStatus | upper }}  
+      {% endif %}
+      {% comment %} {% if item.StaffName == "FS-PJ" %}  {# Use '==' instead of '=' for comparison #}
+     <b> Staff Name:</b> Nadeem ud-Din
+    {% else %}
+  <b>Staff Name:</b> {{ item.StaffName }} {# Missing whitespace before 'item.StaffName' #}
+    {% endif %} {% endcomment %}
+  </td>
+  <td>  {% if item.ptscms_enroll == "no" %}
+        <span class="text-danger"><b> PTSMC Child Enroll:</b> {{ item.ptscms_enroll }} | {{ item.ptsmc_designation }} </span>
+       {% else %}
+        <b> PTSMC Child Enroll:</b> {{ item.ptscms_enroll }}
+       {% endif %} 
+  </td>
+
+</tr>  
+<tr>
+  <td style="vertical-align: middle;"> <span class=""> <strong> Enrollment as Per Register: </strong> </span>  </td>
+  <td >  
+    <div>
+      <h5> Girls Enrollment:
+       <span class="position-absolute badge rounded-pill bg-primary"> {{ item.girls_reg_kachi | add:item.girls_reg_one | add:item.girls_reg_two | add:item.girls_reg_three | add:item.girls_reg_four | add:item.girls_reg_five }} 
+       </span> </h5>
+       <h5>Boys Enrollment: 
+        <span class="position-absolute badge rounded-pill bg-primary"> {{ item.boys_reg_kachi | add:item.boys_reg_one | add:item.boys_reg_two | add:item.boys_reg_three | add:item.boys_reg_four | add:item.boys_reg_five }}   
+        </span> </5>
+    </div>
+  </td>
+  <td style="vertical-align: middle;">  <span class=""> <strong> Enrollment at time of visit: </strong> </span> </td>
+  
+  <td> 
+    <div> 
+      <h5>Girls Enrollment:
+      <span class="position-absolute badge rounded-pill bg-primary">{{ item.girls_kachi | add:item.girls_one | add:item.girls_two | add:item.girls_three | add:item.girls_four | add:item.girls_five }}   
+      </span> </h5> 
+      <h5> Boys Enrollment: 
+      <span class="position-absolute badge rounded-pill bg-primary">{{ item.boys_kachi | add:item.boys_one | add:item.boys_two | add:item.boys_three | add:item.boys_four | add:item.boys_five }}
+      </span> </h5>
+    </div>
+  </td>
+  <td class="text-justify">
+    
+  </td>
+</tr>
+<tr>
+  <td colspan=6>
+    
+      <h5> Remarks: 
+       <span class="">{{ item.descriptions}}
+       </span> </h5>
+     
+   </td>
+  </td>
+</tr>
+  
+{% endfor %}
+</tbody>
+{% comment %} <div class="table-responsive-sm"> {% endcomment %}
+</table>
+
+
+{% endblock %}    

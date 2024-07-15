@@ -1,0 +1,252 @@
+{% extends 'androidchecklist/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+          <form method="get" action="{% url 'charts-page' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <label for="startDate"> From:</label>
+                    <input type="date" id="startDate" name="startDate" placeholder="dd-mm-yyyy"
+                    min="1997-01-01" max="2030-12-31" class="form-control" required>
+                </div>
+                <div class="col">
+                    <label for="endDate"> to:</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" required>
+                </div> 
+                <div class="col">
+                    <button class="btn btn-info mt-4" type="submit" >Search</button>
+                </div>
+            </div> 
+        </form>
+         <b>  {{ start_date | date:"d-M-Y" }} </b>     --- End Date: ... <b> {{ end_date | date:"d-M-Y" }} </b>
+        
+         <div class="card bg-light" style="width: 250px; margin:2px; padding:1px;">
+            <div class="card-body border-left-success shadow h-100 py-4 px-4" >
+                <div class="row no-gutters align-items-center">
+                <h1 class="card-subtitle mb-3">{{ all_records | length }}</h1>
+                <h4 class="card-title">Total Entries </h4>
+                </div>
+            </div>
+        </div>
+        <div class="card bg-light" style="width: 250px; margin:2px; padding:1px;">
+            <div class="card-body border-left-success shadow h-100 py-4 px-4">
+                                
+                <h1 class="card-subtitle mb-3"> {{ total_entries }} </h1>
+                <h4 class="card-title">Last 30 days entries </h4>
+                
+            </div>
+        </div>
+        <div class="card" style="width: 250px; margin:2px; padding:1px;">
+            <div class="card-body border-left-success shadow h-100 py-2">
+                                
+                <h5 class="card-subtitle mb-3">    Schools found open: {{ dataentry }} <hr class="hr hr-blurry">
+                    Schools found closed:  {{ closed }} </h1>
+             
+            </div><small>  <kbd> from: {{ start_date | date:"d-M-Y"  }} to {{ end_date | date:"d-M-Y" }} </kbd> </small>
+        </div>
+        <div class="card  bg-warning" style="width: 275px; margin:2px; padding:1px;">
+            <div class="card-body">
+                
+                <h5 class="card-subtitle mb-3 text-white">    Schools found open: {{ dataentry }} <hr class="hr hr-blurry">
+                    Schools found closed:  {{ closed }} </h1>
+             
+            </div><small>  <kbd> from: {{ start_date | date:"d-M-Y"  }} to {{ end_date | date:"d-M-Y" }} </kbd> </small>
+        </div>
+    </div>
+    
+   <hr class="hr hr-blurry">   
+        
+                   
+    <div class="row">
+        <div class="col-sm">
+            <div style="width: 300px; height: 400px;">
+            <mark> <kbd> Open: {{ dataentry }} </kbd> </mark> 
+            <mark> <kbd> Closed:  {{ closed }} </kbd> </mark> 
+            
+            <canvas id="schoolPieChart" style="width: 300px; height: 400px;"></canvas>
+            <script>
+                var ctx = document.getElementById('schoolPieChart').getContext('2d');
+                var data = {
+                    labels: ['Open', 'Closed'],
+                    datasets: [{
+                        data: [{{ dataentry }}, {{ closed }}],
+                        backgroundColor: ['#36A2EB', '#FF6384'],
+                    }],
+                };
+            
+                var options = {
+                    responsive: true,
+                };
+            
+                var pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: data,
+                    options: options,
+                });
+            </script>
+        </div>
+        </div>
+
+        <div class="col-sm">
+            <div style="width: 200px; height: 400px;">
+            <figure>
+                <blockquote class="blockquote">
+                  <p>{{ total_entries }}</p>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                  # of Entries made  in last 30 days
+                </figcaption>
+            </figure>
+           
+            {% for region, regionCount in region_zip %}
+                 <strong> {{ region }} </strong> :  {{ regionCount }} <br/>
+            {% endfor %}
+            
+            </div>
+        </div>
+
+
+        <div class="col-sm"> 
+            
+            <div style="width: 400px; height: 400px;">
+            <canvas id="regionChart"  style="width: 300px; height: 400px;"  ></canvas>
+            <script>
+                var ctx = document.getElementById('regionChart').getContext('2d');
+                
+                var data = {
+                    labels: [ {% for region in region_list  %} '{{ region | escapejs }}' , {% endfor %} ],
+                    datasets: [{
+                        data: [ {% for regionCount in region_count %} '{{ regionCount }}', {% endfor %} ],
+                        backgroundColor: ['#36A2EB', '#FF6384','#ffb3b3','#00ff80','#006b00','#00d9cb','#ffd9cb','#ffc700'],
+                        borderColor: [
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)'
+                        ],
+                        borderWidth: 1
+                    }],
+                };
+               
+                var options = {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Region-wise # of Entries in last 30 days'
+                        },
+                        legend: {
+                            display: false,  
+                        }
+        
+                    }
+                };
+            
+                var pieChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: options,
+                        
+                });
+            </script>
+        </div>
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <div>
+                <strong>District Supervisor checklist entries [alphabetical order] </strong>
+                <table class="table table-hover" >
+                    <thead>
+                        <tr>
+                            <th class=""> District  </th>
+                            <th class=""> Staff Name  </th>
+                            <th> School Visited  </th>
+                            <th> School Assigned  </th>
+                            <th> Difference  </th>
+                            <th class=""> %age  </th>
+                            <th class=""> Coverage Graph  </th>
+                        </tr>
+                    </thead>
+                    {% for staff_name, staff_data in staff_counts.items %}
+                        <tr> 
+                            {% if staff_data.count != 0  %}
+                                {% comment %} placing loop counter for serial number {% endcomment %}
+                                <td> {{ staff_data.districts  }} </td>
+                                <td> {{ staff_name }} </td>
+                                <td>  {{ staff_data.count }} </td>
+                                <td>  {{ staff_data.assigned }} </td>
+                                <td>  {{ staff_data.difference }} </td>
+                                <td>  {{ staff_data.coverPercentAge }}% </td>
+                                <td>
+                                    <div class="progress"> 
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated {% if staff_data.coverPercentAge >= 0 and staff_data.coverPercentAge <= 50  %} bg-danger 
+                                                                 {% elif staff_data.coverPercentAge >= 50 and staff_data.coverPercentAge <= 75 %} bg-warning 
+                                                                 {% elif staff_data.coverPercentAge >= 75 and staff_data.coverPercentAge <= 150 %} bg-success
+                                                                 
+                                                                 {% endif %}" role="progressbar"
+                                             aria-valuenow="{{ staff_data.coverPercentAge }}"
+                                             aria-valuemin="0" aria-valuemax="100" style="width: {{ staff_data.coverPercentAge }}%;">
+                                             <script>console.log({{ staff_data.coverPercentAge }});</script>
+                                            {{ staff_data.coverPercentAge }}% complete
+                                        </div>
+                                    </div>
+                                </td>
+                            {% endif %}
+                        </tr>
+                        
+                    {% endfor %}
+                    
+                    </table>
+                   
+            </div>
+        </div>    
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <div>
+                <span class="border border-danger p-1"> Staff with zero entries in last 30 days </span>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                        <th class=""> Staff Name:  </th>
+                        <th> School Visited  </th>
+                        <th> School Assigned  </th>
+                        <th> Difference  </th>
+                        <th class=""> %age  </th>
+                        </tr>
+                    </thead>
+                    {% for staff_name, staff_data in staff_counts.items %}
+                        <tr class="border-bottom">
+                            {% if staff_data.count == 0  %}
+                                <td> {{ staff_name }} </td>
+                                <td>  {{ staff_data.count }} </td>
+                                <td>  {{ staff_data.assigned }} </td>
+                                <td>  {{ staff_data.difference }} </td>
+                                <td>  {{ staff_data.coverPercentAge }} % </td>
+                                <td>
+                                    
+                                </td>
+                            
+                           {% endif %}
+                        </tr>
+                    {% endfor %}
+                    
+                    </table>
+                 
+            </div>
+        </div>    
+
+    </div>
+</div>
+ 
+    
+
+{% endblock %}

@@ -1,0 +1,19 @@
+
+
+{% extends 'androidchecklist/base.html' %}
+{% block content %}
+<div class="mb-1"> </div>
+<a id="delete-link" class="btn btn-danger" href="{% url 'delete-page' %}">Delete existing records from Database</a>
+
+<a class="btn btn-primary"  href="{% url 'insert-page' %}"> Import records from JSON Endpoint. </a>
+
+<a class="btn btn-info"  href="{% url 'record-page' %}"> Show recrod page </a>
+
+<a class="btn btn-info"  href="{% url 'charts-page' %}"> Show Charts page </a>
+
+{% block script %}
+
+{% endblock %}
+
+
+{% endblock %}    

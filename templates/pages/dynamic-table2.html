@@ -1,0 +1,140 @@
+
+<div class="row">
+    <div class="col-md-12"> <form method="get" action="{% url 'tables' %}">
+      {% csrf_token %}
+      
+      <label class="" for="query">Search:</label>
+      <input value="{{ request.GET.q }}" class="form-control" type="text" id="query" name="q" required> <br>
+      <button class="btn btn-success" type="submit" >Search</button>
+    </form>
+    <div class="container mt-3 mb-3">
+      <div class="row">
+        <div class="col-md-9 offset-md-0 bg-white">
+        <p class="h5 shadow-sm p-1 mb-4 bg-white rounded">
+          Visit timeline of CS: {{ dataentry.0.schoolname | upper }} ({{ dataentry.0.district }}) - {{ dataentry.0.bemiscode | upper }} <br/> DS Name: {{ dataentry.0.staff_name }}
+        </p>
+        School visited <span class="badge rounded-pill bg-info text-dark">{{ record_count }}</span> times in last 365 days.
+          <ul class="timeline">
+          {% for item in dataentry %}
+          
+            <li>
+              <strong><a href="#" class="">{{ item.dateofvisit | date:"d-M-Y"  }}</a>  </strong>
+              | <a href="" class="text-danger"> {{ item.schoolname | upper }} - {{ item.bemiscode }} </a> 
+              | <a href="#" class=""><kbd> {{ item.staff_name }} </kbd> </a> | School Status:  {{ item.schoolStatus | upper }} 
+              <br/> 
+              <div class="d-flex flex-col bd-highlight mb-2">
+                <div class="p-0 bd-highlight">
+                  Girls Enrollment (Attendance register):
+                  <span class="position-absolute badge rounded-pill bg-primary text-light">  {{ item.girls_reg_kachi | add:item.girls_reg_one | add:item.girls_reg_two | add:item.girls_reg_three | add:item.girls_reg_four | add:item.girls_reg_five }} 
+                  </span>
+                </div>  
+                 &nbsp; &nbsp; &nbsp; &nbsp; 
+                <div class="p-0 bd-highlight">
+                  Boys Enrollment (Attendance register): 
+                  <span class="position-absolute badge rounded-pill bg-primary text-light"> {{ item.boys_reg_kachi | add:item.boys_reg_one | add:item.boys_reg_two | add:item.boys_reg_three | add:item.boys_reg_four | add:item.boys_reg_five }}   
+                  </span>
+                </div> 
+              </div>
+              <div class="d-flex flex-row bd-highlight mb-2">
+                <div class="p-0 bd-highlight">
+                  Girls Enrollment (Present):
+                  <span class="position-absolute badge rounded-pill bg-primary text-light">{{ item.girls_kachi | add:item.girls_one | add:item.girls_two | add:item.girls_three | add:item.girls_four | add:item.girls_five }}   
+                  </span>
+                </div>  
+                 &nbsp; &nbsp; &nbsp; &nbsp; 
+                <div class="p-0 bd-highlight">
+                  Boys Enrollment (Present): 
+                  <span class="position-absolute badge rounded-pill bg-primary text-light">{{ item.boys_kachi | add:item.boys_one | add:item.boys_two | add:item.boys_three | add:item.boys_four | add:item.boys_five }}
+                  </span>
+                </div> 
+              </div>
+              <p class="lh-3"> <kbd> Remarks:</kbd>  {{ item.descriptions | default:"No Remarks entered" }} </p>
+              <div class="table-responsive text-nowrap table-sm">
+              <table class="table" width="30%">
+                <tr>
+                  <th colspan="6" >School Record Status</th>
+                  
+                </tr>
+                <tr class="p-0">
+                    <td>  Stu Att; Register Available </td> <td>{{ item.stu_att_register_available | capfirst }}<span class="border-end"></span></td> 
+                    <td>  A/W Register Available </td> <td> {{ item.aw_register_available | capfirst }}  <span class="border-end"></span></td>
+                    <td>  Stock Register Available </td> <td> {{ item.stock_register_available | capfirst }}  <span class="border-end"></span></td>
+                </tr>
+                <tr>
+                  <td>  Stu Att; Register Updated: </td> <td> {{ item.stu_att_register_update | capfirst }} </td>
+                  <td>  A/W Register Updated: </td> <td> {{ item.aw_register_update | capfirst }} </td>
+                  <td>  Stock Register Updated </td> <td> {{ item.stock_register_availablee | capfirst | default:"No"  }} </td>
+                </tr>
+                <tr>
+                  <td class=" {% if item.teach_att_register_available == no %} text-danger {% endif %}" >Teacher Att; Register Available:</td> <td> {{ item.teach_att_register_available | capfirst }} </td>
+                  <td>  Cash book Available:</td> <td> {{ item.cash_register_available | capfirst }} </td>  
+                  <td>  Log Book Available </td> <td> {{ item.log_register_available | capfirst }} </td>
+                </tr>
+                <tr>
+                  <td>Teacher Att; Register Updated:</td> <td> {{ item.teach_att_register_update | capfirst }} </td>
+                  <td>  Cash book Updated:</td> <td> {{ item.cash_register_update | capfirst }} </td>
+                  <td>  Log Book Register  Updated: </td> <td> {{ item.log_register_update | capfirst }} </td>
+                </tr>
+                <tr>
+                  <td colspan="6">  
+                    PTSMC Child Enrolled: {% if item.ptscms_enroll == "no" %} 
+                                            <span class="text-danger"> {{ item.ptscms_enroll | capfirst }} </span>
+                                            <strong> Designation: </strong> {{ item.ptsmc_designation | capfirst }}  
+                                          {% else %} 
+                                            {{ item.ptscms_enroll | capfirst }}  
+                                          {% endif %}
+                  
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="6">
+                      Stationary Purchased: {% if item.stationary_purchased == "yes" %} 
+                                              {{ item.stationary_purchased }}  - Amount : {{ item.stationary_amount_pkr }} 
+                                            {% else %}
+                                              Stationary not Purchased
+                                            {% endif %}  
+                  </td>
+  
+                </tr>
+            </table>
+          </div>               
+            </li>
+            &nbsp; &nbsp; &nbsp; &nbsp; 
+            <hr/>
+           {% endfor %}  
+          </ul>
+         </div>
+      <div class="iframe-container">
+        {% comment %} <iframe class="parent-fit" src="/datatb/product/"></iframe>   {% endcomment %}
+        
+      </div>
+    </div>
+  </div>
+
+  {% comment %} other timeline  second one {% endcomment %}
+
+  <div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-timeline">
+  
+                <div class="timeline">
+                    {% for item in dataentry  %}
+                    <a href="" class="timeline-content">
+                        <div class="timeline-icon"><i class="fa fa-globe"></i></div>
+                        <h3 class="title">{{item.schoolname}}</h3>
+                        Girls Enrollment (Attendance register):
+                  <span class="position-absolute badge rounded-pill bg-primary text-light">  {{ item.girls_reg_kachi | add:item.girls_reg_one | add:item.girls_reg_two | add:item.girls_reg_three | add:item.girls_reg_four | add:item.girls_reg_five }} 
+                  </span>
+                        <p class="description">
+                          {{item.descriptions}}
+                        </p>
+                        <div class="timeline-year">{{item.dateofvisit}}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+  </div>

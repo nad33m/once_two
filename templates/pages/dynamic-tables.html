@@ -1,0 +1,109 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+
+<style>
+
+.iframe-container {display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden;}
+.parent-fit { flex-grow: 1; border: none; margin: 0; padding: 0; height: 100vh; }
+
+</style>
+
+{% endblock extrastyle %}
+
+{% block content %}
+
+
+<div class="row">
+  <div class="col-md-12"> 
+    <form class="form" method="get" action="{% url 'tables' %}">
+      <div class="row">
+        {% csrf_token %}
+    
+        <div class="col-sm-8">
+          
+          <input value="{{ request.GET.q }}" class="form-control" type="number" id="query" name="q" min="45001" max="45800" required>
+        </div>
+
+        <div class="col-sm-4">
+          <button class="btn btn-success border-start-0 border rounded-pill ms-n3 " type="submit" >  <i class="fa fa-search"></i></button>
+        </div>
+      </div><hr class="blurry">
+    </form>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-md-12">
+    <dl class="row">
+      <dt class="col-sm-3 text-dark">Visit timeline CS:</dt>
+      <dd class="col-sm-9 text-dark">{{ dataentry.0.schoolname | upper }} ({{ dataentry.0.district }})
+      <p class="mt-n3">visited <span class="badge rounded-pill bg-info text-dark">{{ record_count }}</span> times in last 365 days.</p>
+      </dd>
+      <dt class="col-sm-3 text-dark">DS Name: </dt>
+      <dd class="col-sm-9"> {{ dataentry.0.staff_name }} 
+       
+      </dd>
+    </dl>
+   
+    <ul class="timeline ps-0">  
+      {% for item in dataentry %}
+      <li class="timeline-item d-flex justify-content-between">
+          <span class="timeline-marker bg-primary"></span>   
+          
+          <div class="timeline-content w-75">
+              <h3>{{ item.dateofvisit }} </h3>
+              
+              <dl class="row">
+                <dt class="col-sm-6 fw-bold">School Status:</dt>
+                <dd class="col-sm-6"> {% if item.schoolStatus == "open" %}   
+                                        <span class="text-success font-weight-bold"> {{ item.schoolStatus | upper }} </span>
+                                      {% else %} 
+                                        <span class="text-danger font-weight-bold"> {{ item.schoolStatus | upper }} </span>
+                                      {% endif %}
+                </dd>  
+                <dt class="col-sm-6">Girls Enrollment (Attendance register):</dt>
+                <dd class="col-sm-6">{{ item.girls_reg_kachi | add:item.girls_reg_one | add:item.girls_reg_two | add:item.girls_reg_three | add:item.girls_reg_four | add:item.girls_reg_five }}</dd>
+              
+                <dt class="col-sm-6">Boys Enrollment (Attendance register): </dt>
+                <dd class="col-sm-6">{{ item.boys_reg_kachi | add:item.boys_reg_one | add:item.boys_reg_two | add:item.boys_reg_three | add:item.boys_reg_four | add:item.boys_reg_five }}</dd>
+              
+                <dt class="col-sm-6">Girls Enrollment (Present): </dt>
+                <dd class="col-sm-6">{{ item.girls_kachi | add:item.girls_one | add:item.girls_two | add:item.girls_three | add:item.girls_four | add:item.girls_five }}</dd>
+              
+                <dt class="col-sm-6">Boys Enrollment (Present): </dt>
+                <dd class="col-sm-6">{{ item.boys_kachi | add:item.boys_one | add:item.boys_two | add:item.boys_three | add:item.boys_four | add:item.boys_five }}</dd>
+                
+                <dt class="col-sm-6">PTSMC Child Enrolled: </dt>
+                <dd class="col-sm-6">{% if item.ptscms_enroll == "no" %} 
+                                          <span class="text-danger"> {{ item.ptscms_enroll | capfirst }} </span>
+                                          <strong> Designation: </strong> {{ item.ptsmc_designation | capfirst }}  
+                                        {% else %} 
+                                          {{ item.ptscms_enroll | capfirst }}  
+                                        {% endif %}
+                </dd>
+                <dt class="col-sm-6">Stationary Purchased:</dt>
+                <dd class="col-sm-6"> {% if item.stationary_purchased == "yes" %} 
+                                          {{ item.stationary_purchased }}  - Amount : {{ item.stationary_amount_pkr }} 
+                                      {% else %}
+                                          Stationary not Purchased
+                                      {% endif %}    
+                </dd>
+                
+              </dl>
+              <div class="col-sm-2"> <kbd class="lh-base"> Remarks:</kbd>  </div>
+              <div class="col-sm-10">{{ item.descriptions | default:"No Remarks entered" }} </div>
+          </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+
+
+{% endblock content %}

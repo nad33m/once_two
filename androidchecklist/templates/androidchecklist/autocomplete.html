@@ -1,0 +1,49 @@
+{% extends 'androidchecklist/base.html' %}
+
+{% block content %}
+
+<input type="text" id="name-input" name="name" autocomplete="off" size=50>
+<div id="suggestions-container"></div>
+
+<script>
+    const nameInput = document.getElementById('name-input');
+    const suggestionsContainer = document.getElementById('suggestions-container');
+
+    nameInput.addEventListener('input', function () {
+        const query = nameInput.value.trim();
+        if (query.length >= 2) {
+            fetch('/autocomplete/?query=${encodeURIComponent(query)}', {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showSuggestions(data);
+                });
+        } else {
+            clearSuggestions();
+        }
+    });
+
+    function showSuggestions(suggestions) {
+        clearSuggestions();
+        for (let i = 0; i < suggestions.length; i++) {
+            const suggestionElement = document.createElement('div');
+            suggestionElement.classList.add('suggestion');
+            suggestionElement.textContent = suggestions[i];
+            suggestionElement.addEventListener('click', function () {
+                nameInput.value = suggestions[i];
+                clearSuggestions();
+            });
+            suggestionsContainer.appendChild(suggestionElement);
+        }
+    }
+
+    function clearSuggestions() {
+        while (suggestionsContainer.firstChild) {
+            suggestionsContainer.removeChild(suggestionsContainer.firstChild);
+        }
+    }
+</script>
+{% endblock %}  

@@ -1,0 +1,565 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="row"> 
+        <div class="col-md-12">
+          <form method="get" action="{% url 'index-page' %}" class="mb-2">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <label for="startDate"> From:</label>
+                    <input type="date" id="startDate" name="startDate" placeholder="dd-mm-yyyy"
+                    min="1997-01-01" max="2030-12-31" class="form-control" value="{{ request.GET.startDate }}" required>
+                </div>
+                <div class="col">
+                    <label for="endDate"> to:</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="{{ request.GET.endDate }}" required>
+                </div> 
+                <div class="col">
+                    <button class="btn btn-info mt-4" type="submit" >Search</button>
+                </div>
+            </div> 
+          </form>
+        </div>
+  </div>
+<!-- [ Main Content ] start -->
+  <div class="row">
+    
+    <!--[ Overall Entries section ] start-->
+    <div class="col-md-4 col-xl-4">
+      <div class="card daily-sales">
+        <div class="card-block">
+          <h6 class="mb-4">Total Entries</h6>
+          <div class="row d-flex align-items-center">
+            <div class="col-9">
+              <h3 class="f-w-300 d-flex align-items-center m-b-0"><i
+                  class="feather icon-arrow-up text-c-green f-30 m-r-10"></i>
+                  {{ all_records | length }} </h3>
+            </div>
+            
+            <div class="col-3 text-right">
+              <p class="m-b-0"> {{ emoji }} </p>
+            </div>
+          </div>
+          <div class="progress m-t-30" style="height: 7px;">
+            <div class="progress-bar progress-c-theme" role="progressbar" style="width: 50%;"
+              aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div> 
+    <!--[ Overall Entries section ] end-->
+    <!--[ Monthly  Entries section ] starts-->
+    <div class="col-md-4 col-xl-4">
+      <div class="card Monthly-sales">
+        <div class="card-block">
+          <h6 class="mb-4">Entries in last 30 days</h6>
+          <div class="row d-flex align-items-center">
+            <div class="col-9">
+              <h3 class="f-w-300 d-flex align-items-center  m-b-0"><i
+                  class="{% if  thirty_days_percentage < 60 %} feather icon-arrow-down text-c-red {% else %} feather icon-arrow-up text-c-green {% endif %} f-30 m-r-10"></i>{{ total_entries }} </h3>
+            </div> 
+            <div class="col-3 text-right">
+              <p class="m-b-0">{{ thirty_days_percentage }}% </p>
+            </div>
+          </div>
+          <div class="progress m-t-30" style="height: 7px;">
+            <div class="progress-bar progress-c-theme2" role="progressbar" style="width: {{ thirty_days_percentage }}%;"
+              aria-valuenow="{{ thirty_days_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Monthly  Entries section ] end-->
+    <div class="col-md-4 col-xl-4">
+      <div class="card Monthly-sales">
+        <div class="card-block">
+          <h6 class="mb-4">Entries today</h6>
+          <div class="row d-flex align-items-center">
+            <div class="col-9">
+              <h3 class="f-w-300 d-flex align-items-center  m-b-0"><i
+                  class="{% if  thirty_days_percentage < 60 %} feather icon-arrow-down text-c-red {% else %} feather icon-arrow-up text-c-green {% endif %} f-30 m-r-10"></i>{{ number_entries_today_2 }} </h3>
+            </div> 
+            <div class="col-3 text-right">
+              {% comment %} <p class="m-b-0">{{ thirty_days_percentage }}% </p> {% endcomment %}
+            </div>
+          </div>
+          <div class="progress m-t-30" style="height: 7px;">
+            <div class="progress-bar progress-c-theme2" role="progressbar" style="width: {{ thirty_days_percentage }}%;"
+              aria-valuenow="{{ thirty_days_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Region wise graph section ] starts-->
+    <div class="col-md-8 col-xl-8">
+      <div class="card yearly-sales">
+        <div class="card-block">
+          <canvas id="regionChart"></canvas>
+            <script>
+                var ctx = document.getElementById('regionChart').getContext('2d');
+                
+                var data = {
+                    labels: [ {% for region in region_list  %} '{{ region | escapejs }}' , {% endfor %} ],
+                    datasets: [{
+                        data: [ {% for regionCount in region_count %} '{{ regionCount }}', {% endfor %} ],
+                        backgroundColor: ['#36A2EB', '#FF6384','#ffb3b3','#00ff80','#006b00','#00d9cb','#ffd9cb','#ffc700'],
+                        borderColor: [
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)',
+                            'rgb(0, 0, 0)'
+                        ],
+                        borderWidth: 1
+                    }],
+                };
+               
+                var options = {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Region-wise # of Entries in last 30 days'
+                        },
+                        legend: {
+                            display: false,  
+                        }
+        
+                    }
+                };
+            
+                var pieChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: options,
+                        
+                });
+            </script>
+        </div>
+      </div>
+    </div>
+    <!--[ Region wise graph section ] end-->
+    
+    <!--[ Open / Close Pie Chart Section ] Start-->
+    <div class="col-md-4 col-xl-4">
+      <div class="card Monthly-sales">
+        <div class="card-block">
+          <mark> <kbd> Open: {{ dataentry }} </kbd> </mark> 
+            <mark> <kbd> Closed:  {{ closed }} </kbd> </mark> 
+            
+            <canvas id="schoolPieChart" style="width: 300px; height: 400px;"></canvas>
+            <script>
+                var ctx = document.getElementById('schoolPieChart').getContext('2d');
+                var data = {
+                    labels: ['Open', 'Closed'],
+                    datasets: [{
+                        data: [{{ dataentry }}, {{ closed }}],
+                        backgroundColor: ['#36A2EB', '#FF6384'],
+                    }],
+                };
+            
+                var options = {
+                    responsive: true,
+                };
+            
+                var pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: data,
+                    options: options,
+                });
+            </script>
+        </div>
+      </div>
+    </div>
+    <!--[ Open / Close Pie Chart section ] end-->
+
+
+    <!--[ Recent Users ] start-->
+    <div class="col-xl-12 col-md-10">
+      <div class="card Recent-Users">
+
+        
+
+          <div class="card-header">
+            <h5>Checklist entries by District Supervisor [alphabetical order]</h5>
+          </div>
+          <div class="card-block px-0 py-3">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                      <th class=""> completed  </th>
+                      <th class=""> Staff Name  </th>
+                      <th> School Assigned   </th>
+                      <th> School Visited   </th>
+                      
+                      
+                  </tr>
+                </thead>
+                
+                <tbody>
+                  {% comment %} {% for region, regionCount in region_zip %} {% endcomment %}
+                  {% for staff_name, staff_data in staff_counts.items %}
+                    {% if staff_data.count != 0  %}
+                    <tr class="unread">
+                      <td> <h6 class="text-muted"> <i class="
+                        {% if staff_data.coverPercentAge >= 0 and staff_data.coverPercentAge <= 50  %} fas fa-circle fa-2xl m-r-15  text-c-red 
+                            {% elif staff_data.coverPercentAge >= 50 and staff_data.coverPercentAge <= 75 %} fas fa-circle fa-2xl m-r-15  text-c-blue  
+                            {% elif staff_data.coverPercentAge >= 75 and staff_data.coverPercentAge <= 150 %} fas fa-circle fa-2xl m-r-15  text-c-green
+                        {% endif %}"></i>
+
+                        {% comment %} <i class="fas fa-circle text-c-green f-10 m-r-15"></i>  {% endcomment %}
+                        {{ staff_data.coverPercentAge }}%
+                      </h6>   
+                        {% comment %} <img class="rounded-circle" style="width:40px;" src="{% static 'assets/images/user/avatar-1.jpg' %}"
+                          alt="activity-user"> {% endcomment %}
+                      </td>
+                      <td>
+                        <h6 class="mb-1">  {{ staff_name }} </h6>
+                        <p class="m-0"> {{ staff_data.districts }} </p>
+                      </td>
+                      <td>
+                        <h6 class="text-muted">
+                          <i class="fa-solid fa-cart-shopping"></i>
+                          <i class="fas fa-tag text-c-red f-10 m-r-15"></i> <b> schools assigned:</b> 
+                          {{ staff_data.assigned }}
+                        </h6>
+                      </td>
+                      <td>
+                        <a href="" class="label theme-bg2 text-white  f-12"> {{ staff_data.count }}</a>
+                        <a href="" class="label theme-bg text-dark f-12">Remaining CSs: {{ staff_data.difference }}</a>
+                      </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">  
+                             <div class="progress m-0"> 
+                                  <div class="progress-bar progress-bar-striped progress-bar-animated {% if staff_data.coverPercentAge >= 0 and staff_data.coverPercentAge <= 50  %} bg-danger 
+                                                          {% elif staff_data.coverPercentAge >= 50 and staff_data.coverPercentAge <= 75 %} bg-warning 
+                                                          {% elif staff_data.coverPercentAge >= 75 and staff_data.coverPercentAge <= 150 %} bg-success
+                                                          
+                                                          {% endif %} theme-bg2 text-black f-12" role="progressbar"
+                                      aria-valuenow="{{ staff_data.coverPercentAge }}"
+                                      aria-valuemin="0" aria-valuemax="100" style="width: {{ staff_data.coverPercentAge }}%;">
+                                      <script>console.log({{ staff_data.coverPercentAge }});</script>
+                                      {{ staff_data.coverPercentAge }}% complete
+                                  </div>
+                              </div>
+                        </td>
+                      </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+                
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="col-xl-12 col-md-10">
+        <div class="card Recent-Users">
+        
+          <div class="card-header">
+            <h5>Staff with zero entries in last 30 days</h5>
+          </div>
+          <div class="card-block px-0 py-3">
+            <div class="table-responsive table-sm">
+              
+                <span class="border border-danger p-1">  </span>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                        <th class=""> Staff Name:  </th>
+                        <th> School Visited  </th>
+                        <th> School Assigned  </th>
+                        <th> Difference  </th>
+                        <th class=""> %age  </th>
+                        </tr>
+                    </thead>
+                    {% for staff_name, staff_data in staff_counts.items %}
+                        <tr class="border-bottom">
+                            {% if staff_data.count == 0  %}
+                                <td> {{ staff_name }} </td>
+                                <td>  {{ staff_data.count }} </td>
+                                <td>  {{ staff_data.assigned }} </td>
+                                <td>  {{ staff_data.difference }} </td>
+                                <td>  {{ staff_data.coverPercentAge }} % </td>
+                                <td>
+                                    
+                                </td>
+                            
+                           {% endif %}
+                        </tr>
+                    {% endfor %}
+                    
+                    </table>
+                 
+            
+              
+
+              
+            </div>
+          </div>
+
+        
+      </div>
+    </div>
+    <!--[ Recent Users ] end-->
+
+    <!-- [ statistics year chart ] start -->
+    {% comment %} <div class="col-xl-4 col-md-6">
+      <div class="card card-event">
+        <div class="card-block">
+          <div class="row align-items-center justify-content-center">
+            <div class="col">
+              <h5 class="m-0">Upcoming Event</h5>
+            </div>
+            <div class="col-auto">
+              <label class="label theme-bg2 text-white f-14 f-w-400 float-right">34%</label>
+            </div>
+          </div>
+          <h2 class="mt-3 f-w-300">45<sub class="text-muted f-14">Competitors</sub></h2>
+          <h6 class="text-muted mt-4 mb-0">You can participate in event </h6>
+          <i class="fab fa-angellist text-c-purple f-50"></i>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-block border-bottom">
+          <div class="row d-flex align-items-center">
+            <div class="col-auto">
+              <i class="feather icon-zap f-30 text-c-green"></i>
+            </div>
+            <div class="col">
+              <h3 class="f-w-300">235</h3>
+              <span class="d-block text-uppercase">TOTAL IDEAS</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-block">
+          <div class="row d-flex align-items-center">
+            <div class="col-auto">
+              <i class="feather icon-map-pin f-30 text-c-blue"></i>
+            </div>
+            <div class="col">
+              <h3 class="f-w-300">26</h3>
+              <span class="d-block text-uppercase">TOTAL LOCATIONS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> {% endcomment %}
+    <!-- [ statistics year chart ] end -->
+    <!--[social-media section] start-->
+    {% comment %} <div class="col-md-12 col-xl-4">
+      <div class="card card-social">
+        <div class="card-block border-bottom">
+          <div class="row align-items-center justify-content-center">
+            <div class="col-auto">
+              <i class="fab fa-facebook-f text-primary f-36"></i>
+            </div>
+            <div class="col text-right">
+              <h3>12,281</h3>
+              <h5 class="text-c-green mb-0">+7.2% <span class="text-muted">Total Likes</span></h5>
+            </div>
+          </div>
+        </div>
+        <div class="card-block">
+          <div class="row align-items-center justify-content-center card-active">
+            <div class="col-6">
+              <h6 class="text-center m-b-10"><span class="text-muted m-r-5">Target:</span>35,098</h6>
+              <div class="progress">
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width:60%;height:6px;"
+                  aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-6">
+              <h6 class="text-center  m-b-10"><span class="text-muted m-r-5">Duration:</span>3,539</h6>
+              <div class="progress">
+                <div class="progress-bar progress-c-theme2" role="progressbar" style="width:45%;height:6px;"
+                  aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> {% endcomment %}
+    {% comment %} <div class="col-md-6 col-xl-4">
+      <div class="card card-social">
+        <div class="card-block border-bottom">
+          <div class="row align-items-center justify-content-center">
+            <div class="col-auto">
+              <i class="fab fa-twitter text-c-blue f-36"></i>
+            </div>
+            <div class="col text-right">
+              <h3>11,200</h3>
+              <h5 class="text-c-purple mb-0">+6.2% <span class="text-muted">Total Likes</span>
+              </h5>
+            </div>
+          </div>
+        </div>
+        <div class="card-block">
+          <div class="row align-items-center justify-content-center card-active">
+            <div class="col-6">
+              <h6 class="text-center m-b-10"><span class="text-muted m-r-5">Target:</span>34,185</h6>
+              <div class="progress">
+                <div class="progress-bar progress-c-green" role="progressbar" style="width:40%;height:6px;"
+                  aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-6">
+              <h6 class="text-center  m-b-10"><span class="text-muted m-r-5">Duration:</span>4,567</h6>
+              <div class="progress">
+                <div class="progress-bar progress-c-blue" role="progressbar" style="width:70%;height:6px;"
+                  aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="card card-social">
+        <div class="card-block border-bottom">
+          <div class="row align-items-center justify-content-center">
+            <div class="col-auto">
+              <i class="fab fa-google-plus-g text-c-red f-36"></i>
+            </div>
+            <div class="col text-right">
+              <h3>10,500</h3>
+              <h5 class="text-c-blue mb-0">+5.9% <span class="text-muted">Total Likes</span></h5>
+            </div>
+          </div>
+        </div>
+        <div class="card-block">
+          <div class="row align-items-center justify-content-center card-active">
+            <div class="col-6">
+              <h6 class="text-center m-b-10"><span class="text-muted m-r-5">Target:</span>25,998</h6>
+              <div class="progress">
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width:80%;height:6px;"
+                  aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-6">
+              <h6 class="text-center  m-b-10"><span class="text-muted m-r-5">Duration:</span>7,753</h6>
+              <div class="progress">
+                <div class="progress-bar progress-c-theme2" role="progressbar" style="width:50%;height:6px;"
+                  aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> {% endcomment %}
+    <!--[social-media section] end-->
+    <!-- [ rating list ] starts-->
+    {% comment %} <div class="col-xl-4 col-md-6">
+      <div class="card user-list">
+        <div class="card-header">
+          <h5>Rating</h5>
+        </div>
+        <div class="card-block">
+          <div class="row align-items-center justify-content-center m-b-20">
+            <div class="col-6">
+              <h2 class="f-w-300 d-flex align-items-center float-left m-0">4.7 <i
+                  class="fas fa-star f-10 m-l-10 text-c-yellow"></i></h2>
+            </div>
+            <div class="col-6">
+              <h6 class="d-flex  align-items-center float-right m-0">0.4 <i
+                  class="fas fa-caret-up text-c-green f-22 m-l-10"></i></h6>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xl-12">
+              <h6 class="align-items-center float-left"><i
+                  class="fas fa-star f-10 m-r-10 text-c-yellow"></i>5</h6>
+              <h6 class="align-items-center float-right">384</h6>
+              <div class="progress m-t-30 m-b-20" style="height: 6px;">
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width: 70%;"
+                  aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-xl-12">
+              <h6 class="align-items-center float-left"><i
+                  class="fas fa-star f-10 m-r-10 text-c-yellow"></i>4</h6>
+              <h6 class="align-items-center float-right">145</h6>
+              <div class="progress m-t-30  m-b-20" style="height: 6px;">
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width: 35%;"
+                  aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-xl-12">
+              <h6 class="align-items-center float-left"><i
+                  class="fas fa-star f-10 m-r-10 text-c-yellow"></i>3</h6>
+              <h6 class="align-items-center float-right">24</h6>
+              <div class="progress m-t-30  m-b-20" style="height: 6px;">
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width: 25%;"
+                  aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-xl-12">
+              <h6 class="align-items-center float-left"><i
+                  class="fas fa-star f-10 m-r-10 text-c-yellow"></i>2</h6>
+              <h6 class="align-items-center float-right">1</h6>
+              <div class="progress m-t-30  m-b-20" style="height: 6px;">
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width: 10%;"
+                  aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-xl-12">
+              <h6 class="align-items-center float-left"><i
+                  class="fas fa-star f-10 m-r-10 text-c-yellow"></i>1</h6>
+              <h6 class="align-items-center float-right">0</h6>
+              <div class="progress m-t-30  m-b-20" style="height: 6px;">
+                <div class="progress-bar" role="progressbar" style="width:0;" aria-valuenow="0"
+                  aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> {% endcomment %}
+    <!-- [ rating list ] end-->
+    <div class="col-xl-8 col-md-12 m-b-30">
+      {% comment %} <div style="width: 300px; height: 400px;"> {% endcomment %}
+        <canvas id="lineChart"></canvas>   
+        <script>
+            var ctx = document.getElementById('lineChart').getContext('2d');
+            var labels = [];
+            var data = [];
+            {% comment %} Extracting values for months and entries  {% endcomment %}
+            {% for item in result_list %}
+                labels.push('{{ item.0 | escapejs }}');
+                data.push({{ item.1 }});   
+            {% endfor %}
+    
+            var chartData = {
+                labels: labels,
+                datasets: [{
+                    label: 'Month wise entries',
+                    data: data,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)'
+                }]
+    
+            };
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: chartData
+                
+            });
+        </script>
+        {% comment %} ---------------------------------------------  {% endcomment %}
+        
+    
+          
+   </div>
+
+  </div>
+  <!-- [ Main Content ] end -->
+
+{% endblock content %}
